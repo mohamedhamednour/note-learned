@@ -1,0 +1,74 @@
+
+# Threading with Lock Example
+
+import threading
+import time
+
+# Shared variable between threads
+shared_counter = 0
+lock = threading.Lock()
+
+def increment_counter(task_id):
+    global shared_counter
+    print(f"Thread {task_id} is incrementing counter...")
+    time.sleep(2)
+    
+    # Using the lock to ensure only one thread can access the shared counter at a time
+    with lock:
+        shared_counter += 1
+    
+    return shared_counter
+
+def main():
+    tasks = [1, 2, 3]  # Tasks to modify the shared variable
+    
+    # Using ThreadPoolExecutor to execute the tasks with threads
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        results = executor.map(increment_counter, tasks)
+        
+        print(f"Final shared counter value: {shared_counter}")
+
+if __name__ == "__main__":
+    main()
+
+
+# Threading vs Multiprocessing
+
+# Threading:
+# - Threading is used to run multiple tasks concurrently in the same process.
+# - It works well for I/O-bound tasks (e.g., file reading, database access, network operations).
+# - Threading is affected by Python's Global Interpreter Lock (GIL), which means only one thread can execute Python bytecode at a time in a single process.
+
+# Multiprocessing:
+# - Multiprocessing creates multiple processes that can run concurrently on different CPU cores.
+# - It is ideal for CPU-bound tasks that require a lot of computation (e.g., mathematical computations).
+# - Multiprocessing avoids the GIL, allowing each process to run in its own memory space and utilize multiple cores.
+# - While more resource-intensive than threading, it can offer a significant performance boost for CPU-heavy tasks.
+
+# Example for Multiprocessing:
+# When dealing with CPU-bound tasks, you can use multiprocessing to utilize multiple cores.
+
+import multiprocessing
+import time
+
+def increment_counter(task_id, shared_counter):
+    print(f"Process {task_id} is incrementing counter...")
+    time.sleep(2)
+    
+    # Modifying the shared counter
+    shared_counter.value += 1
+    return shared_counter.value
+
+def main():
+    tasks = [1, 2, 3]
+    manager = multiprocessing.Manager()
+    shared_counter = manager.Value('i', 0)  # Shared Value for the counter
+    
+    with multiprocessing.Pool(processes=3) as pool:
+        results = pool.starmap(increment_counter, [(task, shared_counter) for task in tasks])
+        
+        print(f"Final shared counter value: {shared_counter.value}")
+
+if __name__ == "__main__":
+    main()
+
