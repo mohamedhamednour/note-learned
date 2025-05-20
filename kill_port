@@ -1,0 +1,9 @@
+For Linux/macOS:
+Use the lsof command to list all processes using port 7076:
+
+
+lsof -i :7076
+This will show you the process using the port. Once you identify the process ID (PID), you can kill it using:
+
+
+kill -9 <PID>
